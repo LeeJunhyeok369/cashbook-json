@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import DateSelect from "./DateSelect";
 import MonthHistory from "./MonthHistory";
+import Nav from "./Nav";
 
 const RightStyle = styled.div`
   width: 70%;
@@ -15,6 +16,7 @@ const RightStyle = styled.div`
 export default function RightList() {
   return (
     <RightStyle>
+      <Nav />
       <DateSelect />
       <MonthHistory />
     </RightStyle>
