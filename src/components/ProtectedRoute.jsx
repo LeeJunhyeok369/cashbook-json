@@ -1,12 +1,12 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import useAuthStore from "../zustand/store";
+import useAuthStore from "../zustand/store.Auth";
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuthStore();
-  console.log(token);
-  if (!token) {
+  if (!token || token === "null") {
+    console.log("awd");
     Swal.fire({
       icon: "warning",
       title: "비로그인",

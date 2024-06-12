@@ -49,9 +49,14 @@ export const UserInfoApi = async (token) => {
   try {
     const response = await axios.get(
       "https://moneyfulpublicpolicy.co.kr/user",
-      { Authorization: `Bearer ${token}` }
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-    return response;
+    return response.data;
   } catch (error) {
     return error;
   }

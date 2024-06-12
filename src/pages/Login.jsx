@@ -2,9 +2,10 @@ import React, { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { setAuthToken } from "../Hooks/LocalStorage";
-import { LoginApi } from "../api/api.Auth";
+import { LoginApi, UserInfoApi } from "../api/api.Auth";
 import Input from "../components/Input";
-import useAuthStore from "./../zustand/store";
+import useAuthStore from "../zustand/store.Auth";
+import useUserStore from "../zustand/store.User";
 
 const LoginContainer = styled.form`
   width: 500px;
@@ -53,6 +54,7 @@ const LoginContainer = styled.form`
 export default function Login() {
   const navigate = useNavigate();
   const setToken = useAuthStore((state) => state.setToken);
+  const setUser = useUserStore();
 
   const userIdRef = useRef(null);
   const userPwRef = useRef(null);
@@ -75,6 +77,9 @@ export default function Login() {
     if (response.data?.success) {
       setAuthToken(response.data.accessToken);
       setToken(response.data.accessToken);
+      const userInfo = await UserInfoApi(response.data.accessToken);
+      console.log(userInfo);
+      setUser(userInfo);
       navigate("/");
     }
   };

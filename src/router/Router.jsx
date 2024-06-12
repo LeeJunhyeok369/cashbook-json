@@ -2,49 +2,24 @@ import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoute";
 import DefaultLayout from "../layout/DefaultLayout";
-import Detail from "../pages/Detail";
-import Home from "../pages/Home";
-import Join from "../pages/Join";
-import Login from "../pages/Login";
-import Mypage from "../pages/Mypage";
+import RouterData from "./RouterData";
 
 const router = createBrowserRouter([
   {
     element: <DefaultLayout />,
-    children: [
-      {
-        path: "/",
-        element: (
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/detail/:id",
-        element: (
-          <ProtectedRoute>
-            <Detail />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/join",
-        element: <Join />,
-      },
-      {
-        path: "/mypage",
-        element: (
-          <ProtectedRoute>
-            <Mypage />
-          </ProtectedRoute>
-        ),
-      },
-    ],
+    children: RouterData.map((route) => {
+      if (route.withAuth) {
+        return {
+          path: route.path,
+          element: <ProtectedRoute>{route.element}</ProtectedRoute>,
+        };
+      } else {
+        return {
+          path: route.path,
+          element: route.element,
+        };
+      }
+    }),
   },
 ]);
 

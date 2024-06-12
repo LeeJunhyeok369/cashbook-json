@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Swal from "sweetalert2";
 import { setAuthToken } from "../Hooks/LocalStorage";
-import useAuthStore from "../zustand/store";
+import useAuthStore from "../zustand/store.Auth";
+import useUserStore from "../zustand/store.User";
 
 const NavBar = styled.div`
   width: calc(100% - 4rem);
@@ -17,11 +18,25 @@ const NavBar = styled.div`
   > div {
     display: flex;
     align-items: center;
+    color: #fff;
   }
   > div > button {
     all: unset;
     color: #fff;
     cursor: pointer;
+    margin-left: 1.5rem;
+  }
+  > div > div#img {
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+    border-radius: 35px;
+    overflow: hidden;
+  }
+  > div > div#img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   > a {
     all: unset;
@@ -34,11 +49,11 @@ export default function Nav() {
   const { token, setToken } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  // const UserInfo = UserInfo(token);
+  const { user } = useUserStore();
 
-  const Logout = () => {
-    setAuthToken(null);
-    setToken(null);
+  const Logout = async () => {
+    await setAuthToken(null);
+    await setToken(null);
     Swal.fire({
       icon: "success",
       title: "로그아웃",
@@ -55,7 +70,15 @@ export default function Nav() {
         <Link to={"/mypage"}>마이페이지</Link>
       )}
       <div>
-        <p></p>
+        <div id="img">
+          <img
+            src={
+              user.avatar == null ? "/image/default-profile.jpg" : user.avatar
+            }
+            alt=""
+          />
+        </div>
+        <p>{user.nickname}님 환영합니다.</p>
         <button onClick={Logout}>로그아웃</button>
       </div>
     </NavBar>

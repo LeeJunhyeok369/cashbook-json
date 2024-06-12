@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import Input from "../components/Input";
 import InputImage from "../components/InputImage";
-import useAuthStore from "../zustand/store";
+import useAuthStore from "../zustand/store.Auth";
 import Nav from "./../components/Nav";
 
 const MypageContainer = styled.form`
