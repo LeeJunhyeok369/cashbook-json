@@ -1,8 +1,11 @@
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { UserInfoApi, UserInfoUpdateApi } from "../api/api.Auth";
 import Input from "../components/Input";
 import InputImage from "../components/InputImage";
 import useAuthStore from "../zustand/store.Auth";
+import useUserStore from "../zustand/store.User";
 import Nav from "./../components/Nav";
 
 const MypageContainer = styled.form`
@@ -30,33 +33,52 @@ const MypageInner = styled.div`
 `;
 
 export default function Mypage() {
+  const { token } = useAuthStore();
+  const { user, setUser } = useUserStore();
+  const navigate = useNavigate();
+
   const userNameRef = useRef(null);
   const [isFormValid, setIsFormValid] = useState(false);
-  const [userInfo, setUserInfo] = useState();
-  const { token } = useAuthStore();
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const checkFormValidity = () => {
     const userName = userNameRef.current?.value;
     setIsFormValid(userName?.trim().length >= 2);
   };
 
-  // useEffect(async () => {
-  // setUserInfo(await UserInfoApi(token));
-  // console.log("userInfo", userInfo);
-  // }, []);
+  const handleImageChange = (image) => {
+    setSelectedImage(image);
+    setIsFormValid(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const response = await UserInfoUpdateApi(
+      token,
+      selectedImage || user.avatar,
+      userNameRef.current?.value
+    );
+    if (response.success) {
+      const userInfo = await UserInfoApi(token);
+      await setUser(userInfo);
+
+      navigate("/");
+    }
+  };
 
   return (
-    <MypageContainer>
+    <MypageContainer onSubmit={handleSubmit}>
       <Nav />
       <MypageInner isFormValid={isFormValid}>
-        <InputImage />
+        <InputImage image={user.avatar} onImageChange={handleImageChange} />
         <Input
           forwardedRef={userNameRef}
           label="닉네임"
           placeholder="2자 이상"
           onChange={checkFormValidity}
         />
-        <button id="save" type="submit">
+        <button id="save" type="submit" disabled={!isFormValid}>
           수정하기
         </button>
       </MypageInner>

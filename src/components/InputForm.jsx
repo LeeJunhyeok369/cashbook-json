@@ -1,9 +1,9 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
-import { setLocalStorege } from "../Hooks/LocalStorage";
-import { setData as setDataAction } from "../redux/slice/historySlice";
+import { postJSON } from "../api/api.Json";
+import useUserStore from "../zustand/store.User";
 import Input from "./Input";
 
 const Form = styled.form`
@@ -30,8 +30,15 @@ const Form = styled.form`
 `;
 
 export default function InputForm() {
-  const data = useSelector((state) => state.history.data);
-  const dispatch = useDispatch();
+  const { user } = useUserStore();
+  const queryClient = useQueryClient(); // Use useQueryClient hook
+
+  const mutation = useMutation({
+    mutationFn: postJSON,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["history"]);
+    },
+  });
 
   const [formData, setFormData] = useState({
     id: uuidv4(),
@@ -39,6 +46,7 @@ export default function InputForm() {
     item: "",
     amount: 0,
     description: "",
+    createdBy: user.id,
   });
   const [isFormValid, setIsFormValid] = useState(false);
 
@@ -52,14 +60,14 @@ export default function InputForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(setDataAction([...data, formData]));
-    setLocalStorege("data", [...data, formData]);
+    mutation.mutate(formData);
     setFormData({
       id: uuidv4(),
       date: "",
       item: "",
       amount: 0,
       description: "",
+      createdBy: user.id,
     });
   };
 

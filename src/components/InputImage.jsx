@@ -58,15 +58,20 @@ const StlyeLabel = styled.label`
 export default function InputImage({
   name = "image",
   image = "/image/default-profile.jpg",
+  onImageChange,
 }) {
   const [imageSrc, setImageSrc] = useState(image);
   const inputId = useId();
 
   const handleChange = (e) => {
+    const file = e.target.files[0];
     const reader = new FileReader();
-    reader.readAsDataURL(e.target.files[0]);
+    reader.readAsDataURL(file);
     reader.onload = () => {
       setImageSrc(reader.result);
+      if (onImageChange) {
+        onImageChange(file);
+      }
     };
   };
 

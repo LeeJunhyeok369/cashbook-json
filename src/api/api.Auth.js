@@ -1,12 +1,14 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
+const AUTH_HOST = "https://moneyfulpublicpolicy.co.kr";
+
 export const LoginApi = async (id, pw) => {
   try {
-    const response = await axios.post(
-      "https://moneyfulpublicpolicy.co.kr/login",
-      { id: id, password: pw }
-    );
+    const response = await axios.post(AUTH_HOST + "/login", {
+      id: id,
+      password: pw,
+    });
     Swal.fire({
       icon: "success",
       title: "로그인 완료",
@@ -25,10 +27,11 @@ export const LoginApi = async (id, pw) => {
 
 export const JoinApi = async (id, pw, nickname) => {
   try {
-    const response = await axios.post(
-      "https://moneyfulpublicpolicy.co.kr/register",
-      { id: id, password: pw, nickname: nickname }
-    );
+    const response = await axios.post(AUTH_HOST + "/register", {
+      id: id,
+      password: pw,
+      nickname: nickname,
+    });
     Swal.fire({
       icon: "success",
       title: "회원가입이 완료",
@@ -47,17 +50,37 @@ export const JoinApi = async (id, pw, nickname) => {
 
 export const UserInfoApi = async (token) => {
   try {
-    const response = await axios.get(
-      "https://moneyfulpublicpolicy.co.kr/user",
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(AUTH_HOST + "/user", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     return error;
+  }
+};
+export const UserInfoUpdateApi = async (token, img, name) => {
+  try {
+    const formData = new FormData();
+    formData.append("avatar", img);
+    formData.append("nickname", name);
+
+    const response = await axios.patch(AUTH_HOST + "/profile", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    Swal.fire({
+      icon: "success",
+      title: "사용자 정보 수정 완료",
+      text: name + "님의 사용자 정보가 수정되었습니다.",
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user info:", error);
+    throw error;
   }
 };

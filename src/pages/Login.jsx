@@ -54,7 +54,7 @@ const LoginContainer = styled.form`
 export default function Login() {
   const navigate = useNavigate();
   const setToken = useAuthStore((state) => state.setToken);
-  const setUser = useUserStore();
+  const { setUser } = useUserStore();
 
   const userIdRef = useRef(null);
   const userPwRef = useRef(null);
@@ -78,8 +78,7 @@ export default function Login() {
       setAuthToken(response.data.accessToken);
       setToken(response.data.accessToken);
       const userInfo = await UserInfoApi(response.data.accessToken);
-      console.log(userInfo);
-      setUser(userInfo);
+      await setUser(userInfo);
       navigate("/");
     }
   };

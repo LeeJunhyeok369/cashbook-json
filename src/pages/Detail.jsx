@@ -1,10 +1,10 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { setLocalStorege } from "../Hooks/LocalStorage";
+import Swal from "sweetalert2";
+import { deleteJSON, getJSON, updateJSON } from "../api/api.Json";
 import Input from "../components/Input";
-import { setData as setDataAction } from "../redux/slice/historySlice";
 
 const DetailContainer = styled.div`
   width: 500px;
@@ -64,11 +64,20 @@ const Overlay = styled.div`
 `;
 
 export default function Detail() {
-  const data = useSelector((state) => state.history.data);
-  const dispatch = useDispatch();
   const { id } = useParams();
   const navigate = useNavigate();
-  const idData = data.find((item) => item.id === id);
+  const queryClient = useQueryClient();
+
+  const {
+    data: history = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["history"],
+    queryFn: getJSON,
+  });
+
+  const idData = history.find((item) => item.id === id);
 
   const [formData, setFormData] = useState(
     idData || {
@@ -89,9 +98,8 @@ export default function Detail() {
   const descriptionRef = useRef();
 
   useEffect(() => {
-    setFormData(idData);
+    if (idData) setFormData(idData);
   }, [idData]);
-  useEffect(() => {}, [dispatch]);
 
   const validateFormData = () => {
     const datePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -102,14 +110,41 @@ export default function Detail() {
     return isDateValid && isItemValid && isDescriptionValid;
   };
 
+  const updateMutation = useMutation({
+    mutationFn: updateJSON,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["history"]);
+      Swal.fire({
+        icon: "success",
+        title: "저장 완료",
+      });
+      navigate("/");
+    },
+    onError: () => {
+      setModalMessage("업데이트 중 오류가 발생했습니다.");
+      setShowModal(true);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteJSON,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["history"]);
+      Swal.fire({
+        icon: "success",
+        title: "삭제 완료",
+      });
+      navigate("/");
+    },
+    onError: () => {
+      setModalMessage("삭제 중 오류가 발생했습니다.");
+      setShowModal(true);
+    },
+  });
+
   const handleSave = () => {
     if (validateFormData()) {
-      const SaveData = data.map((item) =>
-        item.id === formData.id ? { ...formData } : item
-      );
-      dispatch(setDataAction(SaveData));
-      setLocalStorege("data", SaveData);
-      navigate("/");
+      updateMutation.mutate({ id: formData.id, updatedData: formData });
     } else {
       setModalMessage("입력된 정보가 올바르지 않습니다.");
       setShowModal(true);
@@ -117,10 +152,7 @@ export default function Detail() {
   };
 
   const handleDelete = () => {
-    const DelData = data.filter((item) => item.id !== formData.id);
-    dispatch(setDataAction(DelData));
-    setLocalStorege("data", DelData);
-    navigate("/");
+    deleteMutation.mutate(formData.id);
   };
 
   return (
